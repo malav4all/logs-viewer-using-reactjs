@@ -12,9 +12,11 @@ const hexToAscii = (hex: string) => {
 const LogsTable = ({ logs }: any) => {
   return (
     <div className="container mx-auto mt-10 p-4">
-      <div className="overflow-x-auto  max-h-[800px]">
+      {/* Scrollable container */}
+      <div className="overflow-x-auto max-h-[600px]">
         <table className="table-auto w-full text-left border-collapse border border-gray-300 shadow-md">
-          <thead className="bg-blue-500 text-white">
+          {/* Sticky header */}
+          <thead className="bg-blue-500 text-white sticky top-0">
             <tr>
               <th className="px-4 py-2 w-1/6 border border-gray-300">
                 Timestamp
@@ -25,6 +27,8 @@ const LogsTable = ({ logs }: any) => {
               </th>
             </tr>
           </thead>
+
+          {/* Table body */}
           <tbody>
             {logs.map((log: any, index: number) => (
               <tr

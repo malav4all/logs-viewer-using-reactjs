@@ -44,9 +44,36 @@ const App = () => {
   };
 
   return (
-    <div className="container mx-auto">
-      <input type="file" onChange={handleFileUpload} className="mb-4" />
-      {logs.length > 0 && <LogsTable logs={logs} />}
+    <div className="container mx-auto mt-10 p-6">
+      {/* App Heading */}
+      <h1 className="text-4xl font-bold text-center text-blue-600 mb-8">
+        Log Viewer App
+      </h1>
+
+      {/* File Upload Section */}
+      <div className="mb-4">
+        <label className="block text-gray-700 text-lg font-medium mb-2">
+          Upload Log File
+        </label>
+        <input
+          type="file"
+          onChange={handleFileUpload}
+          className="block w-full text-sm text-gray-500
+                   file:mr-4 file:py-2 file:px-4
+                   file:rounded-full file:border-0
+                   file:text-sm file:font-semibold
+                   file:bg-blue-500 file:text-white
+                   hover:file:bg-blue-600
+                   cursor-pointer"
+        />
+      </div>
+
+      {/* Logs Table */}
+      {logs.length > 0 && (
+        <div className="bg-white rounded-lg shadow-md p-4">
+          <LogsTable logs={logs} />
+        </div>
+      )}
     </div>
   );
 };
