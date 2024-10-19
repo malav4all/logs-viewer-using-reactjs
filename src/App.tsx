@@ -37,12 +37,18 @@ const App = () => {
           action: "Received (hex)",
           value: line.replace("Received (hex): ", "").trim(),
         });
+      } else if (line.includes("<EOT>")) {
+        // Handle the case where EOT is received
+        parsedLogs.push({
+          timestamp: `Line ${index + 1}`,
+          action: "Received: <EOT>",
+          value: line.trim(),
+        });
       }
     });
 
     return parsedLogs;
   };
-
   return (
     <div className="container mx-auto mt-10 p-6">
       {/* App Heading */}
