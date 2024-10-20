@@ -1,21 +1,63 @@
 import React, { useState } from "react";
 
+// Convert hex to ASCII and remove non-printable characters
 const hexToAscii = (hex: string) => {
   let asciiStr = "";
   for (let i = 0; i < hex.length; i += 2) {
     const hexChar = hex.substr(i, 2);
     asciiStr += String.fromCharCode(parseInt(hexChar, 16));
   }
-  return asciiStr;
+
+  // Remove non-printable characters (characters outside the range of printable ASCII)
+  return asciiStr.replace(/[^\x20-\x7E]/g, "");
+};
+
+// Parse log data into meaningful values
+const parseLogData = (logValue: string) => {
+  // Step 1: Parse the string using '|' as the separator
+  const parsedValues = logValue.split("|");
+
+  // Step 2: Clean each value in the parsed array
+  const cleanedValues = parsedValues.map(
+    (value: any) =>
+      value
+        .replace(/[\^]+/g, "") // Remove '^'
+        .replace(/[^\x20-\x7E]/g, "") // Remove illegal/non-printable characters
+  );
+
+  // Step 3: Parse the date if it's in the last element (ignore extra characters like '8A')
+  const lastValue = cleanedValues[cleanedValues.length - 1];
+  const datePart = lastValue.slice(0, 14); // Extract the date portion
+  if (datePart.length === 14) {
+    const year = datePart.slice(0, 4);
+    const month = datePart.slice(4, 6);
+    const day = datePart.slice(6, 8);
+    const formattedDate = `${day}/${month}/${year}`;
+
+    // Replace the last value with the formatted date
+    cleanedValues[cleanedValues.length - 1] = formattedDate;
+  }
+
+  // Step 4: Remove empty values
+  const filteredValues = cleanedValues.filter(value => value.trim() !== "");
+
+  // Return the cleaned and parsed values without empty spaces
+  return filteredValues;
 };
 
 const LogsTable = ({ logs }: any) => {
   const [selectedHex, setSelectedHex] = useState<string | null>(null);
+  const [asciiValue, setAsciiValue] = useState<string | null>(null);
+  const [parsedValue, setParsedValue] = useState<string[] | null>(null);
 
   // Handle row click
   const handleRowClick = (log: any) => {
     if (log.action === "Received (hex)") {
-      setSelectedHex(log.value); // Set the selected hex value to show in the text box
+      setSelectedHex(log.value); // Set original hex value
+      const ascii = hexToAscii(log.value); // Convert to ASCII
+      setAsciiValue(ascii); // Set ASCII value
+      const parsed = parseLogData(ascii); // Parse ASCII data
+      setParsedValue(parsed); // Set parsed data
     }
   };
 
@@ -72,17 +114,25 @@ const LogsTable = ({ logs }: any) => {
         </table>
       </div>
 
-      {/* Text box showing selected Received (hex) value */}
-      {selectedHex && (
+      {selectedHex && asciiValue && parsedValue && (
         <div className="mt-4">
           <label className="block text-gray-700 text-lg font-medium mb-2">
             Selected Received (hex) Value:
           </label>
-          <textarea
-            className="w-full h-24 p-2 border border-gray-300 rounded-lg"
-            readOnly
-            value={hexToAscii(selectedHex)}
-          />
+          <div className="p-2 border border-gray-300 rounded-lg">
+            <p>
+              <span className="font-bold text-blue-600">Original Hex: </span>
+              <span>{selectedHex}</span>
+            </p>
+            <p>
+              <span className="font-bold text-green-600">ASCII Value: </span>
+              <span>{asciiValue}</span>
+            </p>
+            <p>
+              <span className="font-bold text-purple-600">Parsed Value: </span>
+              <span>{parsedValue.join(", ")}</span>
+            </p>
+          </div>
         </div>
       )}
     </div>
