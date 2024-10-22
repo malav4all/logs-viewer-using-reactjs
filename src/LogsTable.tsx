@@ -38,11 +38,8 @@ const parseLogData = (logValue: string) => {
     cleanedValues[cleanedValues.length - 1] = formattedDate;
   }
 
-  // Step 4: Remove empty values
-  const filteredValues = cleanedValues.filter(value => value.trim() !== "");
-
-  // Return the cleaned and parsed values without empty spaces
-  return filteredValues;
+  // Step 4: Keep all values including empty strings
+  return cleanedValues;
 };
 
 const LogsTable = ({ logs }: any) => {
@@ -121,17 +118,40 @@ const LogsTable = ({ logs }: any) => {
           </label>
           <div className="p-2 border border-gray-300 rounded-lg">
             <p>
-              <span className="font-bold text-blue-600">Original Hex: </span>
-              <span>{selectedHex}</span>
+              <span className="font-bold text-blue-600">Original ASTM: </span>
+              <span className="whitespace-pre-wrap break-words">
+                {selectedHex}
+              </span>
             </p>
             <p>
               <span className="font-bold text-green-600">ASCII Value: </span>
-              <span>{asciiValue}</span>
+              <span className="whitespace-pre-wrap break-words">
+                {asciiValue}
+              </span>
             </p>
-            <p>
-              <span className="font-bold text-purple-600">Parsed Value: </span>
-              <span>{parsedValue.join(", ")}</span>
-            </p>
+            {/* Display parsed values in a table */}
+            <table className="table-auto w-full text-left mt-4 border-collapse border border-gray-300">
+              <thead>
+                <tr>
+                  <th className="px-4 py-2 border border-gray-300">
+                    Field Name
+                  </th>
+                  <th className="px-4 py-2 border border-gray-300">Value</th>
+                </tr>
+              </thead>
+              <tbody>
+                {parsedValue?.map((value, index) => (
+                  <tr key={index}>
+                    <td className="px-4 py-2 border border-gray-300">
+                      Field {index + 1}
+                    </td>
+                    <td className="px-4 py-2 border border-gray-300">
+                      {value}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
