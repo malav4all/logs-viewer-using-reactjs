@@ -42,19 +42,38 @@ const parseLogData = (logValue: string) => {
   return cleanedValues;
 };
 
+// Function to generate dynamic field name for the table header
+const getFieldHeaderName = (parsedValue: string[]) => {
+  if (parsedValue.length > 0) {
+    const firstValue = parsedValue[0];
+    const firstChar = firstValue.charAt(1);
+    if (firstChar === "R") return "Result Column";
+    if (firstChar === "H") return "Heading Column";
+    if (firstChar === "P") return "Patient Order Heading";
+  }
+  return "Field Name";
+};
+
 const LogsTable = ({ logs }: any) => {
   const [selectedHex, setSelectedHex] = useState<string | null>(null);
   const [asciiValue, setAsciiValue] = useState<string | null>(null);
   const [parsedValue, setParsedValue] = useState<string[] | null>(null);
+  const [selectedRow, setSelectedRow] = useState<number | null>(null); // State to store the selected row index
 
   // Handle row click
-  const handleRowClick = (log: any) => {
+  const handleRowClick = (log: any, index: number) => {
+    setSelectedRow(index); // Set the selected row index
     if (log.action === "Received (hex)") {
       setSelectedHex(log.value); // Set original hex value
       const ascii = hexToAscii(log.value); // Convert to ASCII
       setAsciiValue(ascii); // Set ASCII value
       const parsed = parseLogData(ascii); // Parse ASCII data
       setParsedValue(parsed); // Set parsed data
+    } else if (log.action === "Sent") {
+      // If the action is "Sent", clear the selected values
+      setSelectedHex(null);
+      setAsciiValue(null);
+      setParsedValue(null);
     }
   };
 
@@ -81,9 +100,11 @@ const LogsTable = ({ logs }: any) => {
             {logs.map((log: any, index: number) => (
               <tr
                 key={index}
-                // Conditional background color for "Sent", "Received (hex)", and "EOT" rows
+                // Conditional background color for selected row
                 className={`${
-                  log.action === "Received (hex)"
+                  selectedRow === index
+                    ? "bg-blue-200" // Highlight color for selected row
+                    : log.action === "Received (hex)"
                     ? "bg-green-100" // Color for Received (hex)
                     : log.action === "Sent"
                     ? "bg-yellow-100" // Color for Sent
@@ -91,7 +112,7 @@ const LogsTable = ({ logs }: any) => {
                     ? "bg-red-200" // Color for <EOT>
                     : ""
                 } hover:bg-gray-100 transition-all duration-150 ease-in-out cursor-pointer`}
-                onClick={() => handleRowClick(log)} // Add click handler for rows
+                onClick={() => handleRowClick(log, index)} // Add click handler for rows
               >
                 <td className="px-4 py-2 border border-gray-300 text-gray-700 font-medium">
                   {log.timestamp}
@@ -114,17 +135,17 @@ const LogsTable = ({ logs }: any) => {
       {selectedHex && asciiValue && parsedValue && (
         <div className="mt-4">
           <label className="block text-gray-700 text-lg font-medium mb-2">
-            Selected Received (hex) Value:
+            Selected Received Value:
           </label>
           <div className="p-2 border border-gray-300 rounded-lg">
             <p>
-              <span className="font-bold text-blue-600">Original ASTM: </span>
+              <span className="font-bold text-blue-600">Original Hex: </span>
               <span className="whitespace-pre-wrap break-words">
                 {selectedHex}
               </span>
             </p>
             <p>
-              <span className="font-bold text-green-600">ASCII Value: </span>
+              <span className="font-bold text-green-600">ASTM Value: </span>
               <span className="whitespace-pre-wrap break-words">
                 {asciiValue}
               </span>
@@ -134,7 +155,7 @@ const LogsTable = ({ logs }: any) => {
               <thead>
                 <tr>
                   <th className="px-4 py-2 border border-gray-300">
-                    Field Name
+                    {getFieldHeaderName(parsedValue)}
                   </th>
                   <th className="px-4 py-2 border border-gray-300">Value</th>
                 </tr>
